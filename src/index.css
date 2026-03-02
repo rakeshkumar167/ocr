@@ -1,0 +1,269 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f5f5f5;
+  color: #1a1a1a;
+}
+
+.app {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.app-header h1 {
+  font-size: 1.5rem;
+}
+
+.reset-btn {
+  padding: 8px 16px;
+  background: #374151;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.reset-btn:hover {
+  background: #1f2937;
+}
+
+/* Upload zone */
+.upload-zone {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 60px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: #fff;
+}
+
+.upload-zone:hover,
+.upload-zone.drag-over {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.upload-prompt p {
+  font-size: 1.1rem;
+  color: #4b5563;
+}
+
+.upload-hint {
+  margin-top: 8px;
+  font-size: 0.85rem !important;
+  color: #9ca3af !important;
+}
+
+.upload-preview {
+  max-width: 400px;
+  max-height: 300px;
+  border-radius: 8px;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error */
+.error-msg {
+  text-align: center;
+  padding: 40px;
+  color: #dc2626;
+}
+
+.error-msg button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Results layout */
+.results-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.results-image {
+  flex: 1;
+  min-width: 0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+}
+
+.results-sidebar {
+  width: 420px;
+  flex-shrink: 0;
+}
+
+/* Image overlay */
+.image-overlay-container {
+  position: relative;
+  display: inline-block;
+}
+
+.overlay-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: crosshair;
+}
+
+/* Results table */
+.results-table-container {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.results-table-container h3 {
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+.table-scroll {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.results-table th,
+.results-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.results-table th {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  font-weight: 600;
+  color: #6b7280;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  color: #111827;
+}
+
+.results-table tbody tr {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.results-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.row-text {
+  border-left: 3px solid rgba(34, 197, 94, 0.4);
+}
+
+.row-number {
+  border-left: 3px solid rgba(59, 130, 246, 0.4);
+}
+
+.row-selected {
+  background: #f0f9ff !important;
+}
+
+.row-selected.row-text {
+  border-left-color: rgba(34, 197, 94, 1);
+}
+
+.row-selected.row-number {
+  border-left-color: rgba(59, 130, 246, 1);
+}
+
+.text-cell {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-weight: 500;
+}
+
+.bbox-cell {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.type-text {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+}
+
+.type-number {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .results-layout {
+    flex-direction: column;
+  }
+  .results-sidebar {
+    width: 100%;
+  }
+}
