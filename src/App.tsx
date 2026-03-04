@@ -3,6 +3,7 @@ import { FileUpload } from "./components/FileUpload";
 import { ImageOverlay } from "./components/ImageOverlay";
 import { ResultsTable } from "./components/ResultsTable";
 import { ParsedText } from "./components/ParsedText";
+import { GrokSummary } from "./components/GrokSummary";
 
 export function App() {
   const { status, result, error, selectedIndex, setSelectedIndex, upload, reset } = useOcr();
@@ -47,6 +48,7 @@ export function App() {
             />
           </div>
           <div className="results-sidebar">
+            <GrokSummary words={result.words} />
             <ParsedText words={result.words} />
             <ResultsTable
               words={result.words}
