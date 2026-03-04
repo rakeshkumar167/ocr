@@ -1,26 +1,31 @@
 export const config = { runtime: "edge" };
 
+import { getDb, ensureSchema } from "../../_db";
+import { validateToken, unauthorized } from "../../_auth";
+
 export default async function handler(request: Request): Promise<Response> {
-  if (request.method !== "POST") {
-    return json({ error: "Method not allowed" }, 405);
-  }
+  if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (!(await validateToken(request))) return unauthorized();
 
-  let text: string;
+  const url = new URL(request.url);
+  const parts = url.pathname.split("/");
+  const idIndex = parts.indexOf("invoices") + 1;
+  const invoiceId = parts[idIndex];
+  if (!invoiceId) return json({ error: "Missing invoice id" }, 400);
+
+  let body: { text: string };
   try {
-    const body = await request.json();
-    text = body.text;
+    body = await request.json();
   } catch {
-    return json({ error: "Invalid JSON body" }, 400);
+    return json({ error: "Invalid JSON" }, 400);
   }
 
-  if (!text || typeof text !== "string") {
+  if (!body.text || typeof body.text !== "string") {
     return json({ error: "Missing text field" }, 400);
   }
 
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    return json({ error: "GROQ_API_KEY is not configured" }, 500);
-  }
+  if (!apiKey) return json({ error: "GROQ_API_KEY is not configured" }, 500);
 
   const grokRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -76,7 +81,7 @@ NOTES
         },
         {
           role: "user",
-          content: `Extract the invoice data from this OCR text:\n\n${text}`,
+          content: `Extract the invoice data from this OCR text:\n\n${body.text}`,
         },
       ],
       max_tokens: 1000,
@@ -89,8 +94,19 @@ NOTES
   }
 
   const data = await grokRes.json();
-  const summary: string =
-    data.choices?.[0]?.message?.content ?? "No summary generated";
+  const summary: string = data.choices?.[0]?.message?.content ?? "No summary generated";
+
+  // Extract invoice date from summary
+  const dateMatch = summary.match(/Invoice Date:\s*(.+)/i);
+  const invoiceDate = dateMatch && dateMatch[1].trim() !== "N/A" ? dateMatch[1].trim() : null;
+
+  // Save summary + invoice date to DB
+  const db = getDb();
+  await ensureSchema(db);
+  await db.execute({
+    sql: "UPDATE invoices SET summary = ?, invoice_date = ? WHERE id = ?",
+    args: [summary, invoiceDate, invoiceId],
+  });
 
   return json({ summary }, 200);
 }

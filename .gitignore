@@ -5,3 +5,5 @@ tsconfig.tsbuildinfo
 .claude/
 .vercel
 .env*.local
+.env.local
+local.db

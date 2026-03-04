@@ -10,6 +10,9 @@ interface Props {
 
 const TEXT_COLOR = "rgba(34, 197, 94, ";   // green
 const NUMBER_COLOR = "rgba(59, 130, 246, "; // blue
+const LOW_CONF_COLOR = "rgba(220, 38, 38, "; // red
+
+const LOW_CONF_THRESHOLD = 90;
 
 export function ImageOverlay({ imageUrl, words, selectedIndex, onSelectIndex }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -50,7 +53,8 @@ export function ImageOverlay({ imageUrl, words, selectedIndex, onSelectIndex }: 
 
     words.forEach((word, i) => {
       const isActive = i === selectedIndex || i === hoveredIndex;
-      const baseColor = word.type === "number" ? NUMBER_COLOR : TEXT_COLOR;
+      const isLowConf = word.confidence < LOW_CONF_THRESHOLD;
+      const baseColor = isLowConf ? LOW_CONF_COLOR : word.type === "number" ? NUMBER_COLOR : TEXT_COLOR;
       const alpha = 0.15 + (word.confidence / 100) * 0.35;
       const strokeAlpha = isActive ? 1 : 0.6 + (word.confidence / 100) * 0.4;
 

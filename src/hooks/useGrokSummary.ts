@@ -38,5 +38,10 @@ export function useGrokSummary() {
     setError(null);
   }, []);
 
-  return { status, summary, error, summarize, reset };
+  const setDone = useCallback((text: string) => {
+    setSummary(text);
+    setStatus("done");
+  }, []);
+
+  return { status, summary, error, summarize, reset, setDone };
 }

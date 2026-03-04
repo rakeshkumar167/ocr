@@ -662,6 +662,324 @@ body {
   margin: 0;
 }
 
+/* ── Header Actions ──────────────────────────────────────────── */
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.save-btn {
+  padding: 8px 16px;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-data);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #15803d;
+}
+
+.save-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.logout-btn {
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-data);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.logout-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* ── Login Page ──────────────────────────────────────────────── */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-form h2 {
+  font-family: var(--font-ui);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.login-form input {
+  padding: 12px 14px;
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  font-family: var(--font-data);
+  font-size: 0.82rem;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.login-form input:focus {
+  border-color: var(--accent);
+}
+
+.login-form button {
+  padding: 12px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: background 0.2s;
+}
+
+.login-form button:hover {
+  background: #1d4ed8;
+}
+
+.login-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-error {
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  color: var(--red);
+  text-align: center;
+}
+
+/* ── Invoice History ─────────────────────────────────────────── */
+.history-container {
+  background: var(--surface);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-header h3 {
+  font-family: var(--font-data);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(140, 138, 134, 0.5);
+}
+
+.history-loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.history-empty {
+  padding: 40px 16px;
+  text-align: center;
+  font-family: var(--font-data);
+  font-size: 0.76rem;
+  color: var(--text-2);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-item:hover {
+  background: var(--accent-soft);
+}
+
+.history-date {
+  font-family: var(--font-data);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.history-preview {
+  font-family: var(--font-data);
+  font-size: 0.74rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Low Confidence Editor ───────────────────────────────────── */
+.low-conf-container {
+  background: var(--surface);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.low-conf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.low-conf-header h3 {
+  font-family: var(--font-data);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(140, 138, 134, 0.5);
+}
+
+.review-badge {
+  padding: 3px 8px;
+  background: var(--red-soft);
+  color: var(--red);
+  border-radius: 3px;
+  font-family: var(--font-data);
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.low-conf-empty {
+  padding: 16px;
+  font-family: var(--font-data);
+  font-size: 0.74rem;
+  color: var(--text-2);
+  text-align: center;
+}
+
+.low-conf-list {
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d0d0d0 transparent;
+}
+
+.low-conf-item {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.low-conf-item:last-child {
+  border-bottom: none;
+}
+
+.low-conf-item:hover {
+  background: var(--red-soft);
+}
+
+.low-conf-item.reviewed {
+  background: var(--green-soft);
+}
+
+.low-conf-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.low-conf-original {
+  font-family: var(--font-data);
+  font-size: 0.7rem;
+  color: var(--text-2);
+  text-decoration: line-through;
+}
+
+.low-conf-score {
+  font-family: var(--font-data);
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--red);
+}
+
+.low-conf-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  font-family: var(--font-data);
+  font-size: 0.78rem;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.low-conf-input:focus {
+  border-color: var(--accent);
+}
+
 /* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .app {

@@ -4,6 +4,18 @@ import type { OcrResult, OcrWord, OcrStatus } from "../types";
 
 const NUMBER_RE = /^-?[\d,]+\.?\d*%?$/;
 
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(",")[1]); // strip data:...;base64, prefix
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export function useOcr() {
   const [status, setStatus] = useState<OcrStatus>("idle");
   const [result, setResult] = useState<OcrResult | null>(null);
@@ -19,7 +31,11 @@ export function useOcr() {
     let worker: Awaited<ReturnType<typeof createWorker>> | null = null;
 
     try {
-      worker = await createWorker("eng");
+      const [base64, workerInstance] = await Promise.all([
+        fileToBase64(file),
+        createWorker("eng"),
+      ]);
+      worker = workerInstance;
       const { data } = await worker.recognize(file, {}, { blocks: true });
 
       const rawWords = (data.blocks ?? [])
@@ -37,7 +53,7 @@ export function useOcr() {
         }));
 
       const imageUrl = URL.createObjectURL(file);
-      setResult({ words, imageUrl });
+      setResult({ words, imageUrl, imageBase64: base64, imageMime: file.type });
       setStatus("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");

@@ -3,11 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node dev-server.mjs & vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tesseract.js": "^7.0.0"
