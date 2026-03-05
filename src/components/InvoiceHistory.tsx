@@ -8,16 +8,9 @@ interface Props {
   onDashboard: () => void;
 }
 
-export function InvoiceHistory({ invoices, loading, onSelect, onNew, onDashboard }: Props) {
+export function InvoiceHistory({ invoices, loading, onSelect }: Props) {
   return (
     <div className="history-container">
-      <div className="history-header">
-        <h3>Invoices</h3>
-        <div className="history-actions">
-          <button className="reset-btn" onClick={onDashboard}>Dashboard</button>
-          <button className="reset-btn" onClick={onNew}>New Invoice</button>
-        </div>
-      </div>
       {loading && (
         <div className="history-loading">
           <div className="spinner" />
@@ -48,7 +41,7 @@ export function InvoiceHistory({ invoices, loading, onSelect, onNew, onDashboard
                         })}
                   </td>
                   <td className="desc-cell">
-                    {inv.invoice_description ?? inv.summaryPreview ?? "—"}
+                    {inv.invoice_description ?? inv.summaryPreview ?? "No description"}
                   </td>
                   <td className="amount-cell">
                     {inv.invoice_amount != null

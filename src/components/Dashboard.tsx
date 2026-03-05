@@ -28,7 +28,7 @@ interface Props {
 }
 
 const COLORS = [
-  "#2563eb", "#16a34a", "#dc2626", "#f59e0b", "#8b5cf6",
+  "#4f63e7", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
   "#06b6d4", "#ec4899", "#84cc16", "#f97316", "#6366f1",
   "#14b8a6", "#e11d48", "#a855f7",
 ];
@@ -39,7 +39,7 @@ function formatMonth(month: string): string {
   return date.toLocaleDateString(undefined, { month: "short", year: "numeric" });
 }
 
-export function Dashboard({ authedFetch, onBack }: Props) {
+export function Dashboard({ authedFetch }: Props) {
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedMonths, setSelectedMonths] = useState<Set<string>>(new Set());
@@ -52,7 +52,6 @@ export function Dashboard({ authedFetch, onBack }: Props) {
         if (res.ok) {
           const data: StatsResponse = await res.json();
           setStats(data);
-          // Default: select all months
           setSelectedMonths(new Set(data.monthly.map((m) => m.month)));
         }
       } finally {
@@ -66,11 +65,8 @@ export function Dashboard({ authedFetch, onBack }: Props) {
   const toggleMonth = (month: string) => {
     setSelectedMonths((prev) => {
       const next = new Set(prev);
-      if (next.has(month)) {
-        next.delete(month);
-      } else {
-        next.add(month);
-      }
+      if (next.has(month)) next.delete(month);
+      else next.add(month);
       return next;
     });
   };
@@ -104,11 +100,7 @@ export function Dashboard({ authedFetch, onBack }: Props) {
   if (loading) {
     return (
       <div className="dashboard-container">
-        <div className="history-header">
-          <h3>Dashboard</h3>
-          <button className="reset-btn" onClick={onBack}>Back</button>
-        </div>
-        <div className="history-loading"><div className="spinner" /></div>
+        <div className="loading"><div className="spinner" /></div>
       </div>
     );
   }
@@ -116,22 +108,13 @@ export function Dashboard({ authedFetch, onBack }: Props) {
   if (!stats || stats.monthly.length === 0) {
     return (
       <div className="dashboard-container">
-        <div className="history-header">
-          <h3>Dashboard</h3>
-          <button className="reset-btn" onClick={onBack}>Back</button>
-        </div>
-        <p className="history-empty">No invoice data available yet. Analyze some invoices to see charts.</p>
+        <p className="dash-no-data">No invoice data available yet. Analyze some invoices to see charts.</p>
       </div>
     );
   }
 
   return (
     <div className="dashboard-container">
-      <div className="history-header">
-        <h3>Dashboard</h3>
-        <button className="reset-btn" onClick={onBack}>Back</button>
-      </div>
-
       {/* Summary Stats */}
       <div className="dash-stats-row">
         <div className="dash-stat-card">
@@ -150,7 +133,7 @@ export function Dashboard({ authedFetch, onBack }: Props) {
 
       {/* Month Selector */}
       <div className="dash-month-selector">
-        <span className="dash-month-label">Months</span>
+        <span className="dash-month-label">Filter by Month</span>
         <div className="dash-month-actions">
           <button className="dash-month-action" onClick={selectAll}>All</button>
           <button className="dash-month-action" onClick={selectNone}>None</button>
@@ -175,14 +158,14 @@ export function Dashboard({ authedFetch, onBack }: Props) {
           {barData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fontFamily: "JetBrains Mono" }} />
-                <YAxis tick={{ fontSize: 11, fontFamily: "JetBrains Mono" }} tickFormatter={(v) => `$${v.toLocaleString()}`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e8eaef" />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fontFamily: "Inter" }} stroke="#a0a5b5" />
+                <YAxis tick={{ fontSize: 11, fontFamily: "Inter" }} stroke="#a0a5b5" tickFormatter={(v) => `$${v.toLocaleString()}`} />
                 <Tooltip
                   formatter={(value) => [`$${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, "Total"]}
-                  contentStyle={{ fontFamily: "JetBrains Mono", fontSize: "0.75rem" }}
+                  contentStyle={{ fontFamily: "Inter", fontSize: "13px", borderRadius: "8px", border: "1px solid #e8eaef", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
                 />
-                <Bar dataKey="total" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" fill="#4f63e7" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -200,9 +183,12 @@ export function Dashboard({ authedFetch, onBack }: Props) {
                   cx="50%"
                   cy="50%"
                   outerRadius={100}
+                  innerRadius={50}
                   dataKey="value"
                   label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                   labelLine={true}
+                  strokeWidth={2}
+                  stroke="#ffffff"
                 >
                   {pieData.map((_, idx) => (
                     <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
@@ -210,10 +196,10 @@ export function Dashboard({ authedFetch, onBack }: Props) {
                 </Pie>
                 <Tooltip
                   formatter={(value) => [`$${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, "Spend"]}
-                  contentStyle={{ fontFamily: "JetBrains Mono", fontSize: "0.75rem" }}
+                  contentStyle={{ fontFamily: "Inter", fontSize: "13px", borderRadius: "8px", border: "1px solid #e8eaef", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
                 />
                 <Legend
-                  wrapperStyle={{ fontFamily: "JetBrains Mono", fontSize: "0.7rem" }}
+                  wrapperStyle={{ fontFamily: "Inter", fontSize: "12px" }}
                 />
               </PieChart>
             </ResponsiveContainer>
