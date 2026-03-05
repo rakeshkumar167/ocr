@@ -24,6 +24,9 @@ export interface InvoiceListItem {
   id: string;
   created_at: number;
   invoice_date: string | null;
+  invoice_description: string | null;
+  invoice_amount: number | null;
+  invoice_category: string | null;
   summaryPreview: string | null;
 }
 
@@ -34,6 +37,9 @@ export interface InvoiceRecord {
   ocr_words: OcrWord[];
   summary: string | null;
   invoice_date: string | null;
+  invoice_description: string | null;
+  invoice_amount: number | null;
+  invoice_category: string | null;
   corrections: Correction[];
   created_at: number;
 }

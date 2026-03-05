@@ -25,6 +25,9 @@ export async function ensureSchema(db: Client): Promise<void> {
       ocr_words TEXT NOT NULL,
       summary TEXT,
       invoice_date TEXT,
+      invoice_description TEXT,
+      invoice_amount REAL,
+      invoice_category TEXT,
       created_at INTEGER NOT NULL
     )`,
     `CREATE TABLE IF NOT EXISTS corrections (
@@ -37,4 +40,14 @@ export async function ensureSchema(db: Client): Promise<void> {
       UNIQUE(invoice_id, word_index)
     )`,
   ]);
+
+  // Migrate existing tables: add columns if they don't exist
+  const migrations = [
+    "ALTER TABLE invoices ADD COLUMN invoice_description TEXT",
+    "ALTER TABLE invoices ADD COLUMN invoice_amount REAL",
+    "ALTER TABLE invoices ADD COLUMN invoice_category TEXT",
+  ];
+  for (const sql of migrations) {
+    try { await db.execute(sql); } catch { /* column already exists */ }
+  }
 }

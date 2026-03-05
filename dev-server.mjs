@@ -45,6 +45,9 @@ async function ensureSchema() {
       ocr_words TEXT NOT NULL,
       summary TEXT,
       invoice_date TEXT,
+      invoice_description TEXT,
+      invoice_amount REAL,
+      invoice_category TEXT,
       created_at INTEGER NOT NULL
     )`,
     `CREATE TABLE IF NOT EXISTS corrections (
@@ -57,6 +60,18 @@ async function ensureSchema() {
       UNIQUE(invoice_id, word_index)
     )`,
   ]);
+}
+
+// ── Migration: add new columns to existing tables ─────────────
+async function migrateSchema() {
+  const migrations = [
+    "ALTER TABLE invoices ADD COLUMN invoice_description TEXT",
+    "ALTER TABLE invoices ADD COLUMN invoice_amount REAL",
+    "ALTER TABLE invoices ADD COLUMN invoice_category TEXT",
+  ];
+  for (const sql of migrations) {
+    try { await db.execute(sql); } catch { /* column already exists */ }
+  }
 }
 
 // ── Auth helper ────────────────────────────────────────────────
@@ -107,6 +122,12 @@ PAYMENT INFO
   Account Number:
   Routing Number:
 
+CATEGORY
+  (exactly one of: Services, Office Supplies, Utilities, Travel, Equipment, Software, Insurance, Marketing, Shipping, Food & Beverage, Rent, Maintenance, Other)
+
+DESCRIPTION
+  (one short sentence summarizing what this invoice is for, e.g. "Monthly web hosting from Acme Corp")
+
 NOTES
   (any other relevant info, or "None")`;
 
@@ -145,7 +166,7 @@ async function callGroq(text) {
         { role: "system", content: GROQ_SYSTEM_PROMPT },
         { role: "user", content: `Extract the invoice data from this OCR text:\n\n${text}` },
       ],
-      max_tokens: 1000,
+      max_tokens: 1200,
     }),
   });
 
@@ -157,13 +178,28 @@ async function callGroq(text) {
   return data.choices?.[0]?.message?.content ?? "No summary generated";
 }
 
-// ── Extract invoice date from Grok summary ─────────────────────
-function extractInvoiceDate(summary) {
-  const match = summary.match(/Invoice Date:\s*(.+)/i);
-  if (!match) return null;
-  const dateStr = match[1].trim();
-  if (!dateStr || dateStr === "N/A") return null;
-  return dateStr;
+// ── Extract fields from Grok summary ────────────────────────────
+const VALID_CATEGORIES = [
+  "Services", "Office Supplies", "Utilities", "Travel", "Equipment",
+  "Software", "Insurance", "Marketing", "Shipping", "Food & Beverage",
+  "Rent", "Maintenance", "Other",
+];
+
+function extractFields(summary) {
+  const dateMatch = summary.match(/Invoice Date:\s*(.+)/i);
+  const invoiceDate = dateMatch && dateMatch[1].trim() !== "N/A" ? dateMatch[1].trim() : null;
+
+  const totalMatch = summary.match(/Total:\s*\$?([\d,]+\.?\d*)/i);
+  const invoiceAmount = totalMatch ? parseFloat(totalMatch[1].replace(/,/g, "")) : null;
+
+  const categoryMatch = summary.match(/CATEGORY\s*\n\s*(.+)/i);
+  const rawCategory = categoryMatch ? categoryMatch[1].trim() : null;
+  const invoiceCategory = rawCategory && VALID_CATEGORIES.includes(rawCategory) ? rawCategory : rawCategory ? "Other" : null;
+
+  const descMatch = summary.match(/DESCRIPTION\s*\n\s*(.+)/i);
+  const invoiceDescription = descMatch && descMatch[1].trim() !== "N/A" ? descMatch[1].trim() : null;
+
+  return { invoiceDate, invoiceDescription, invoiceAmount, invoiceCategory };
 }
 
 // ── Route matching ─────────────────────────────────────────────
@@ -174,6 +210,7 @@ function matchRoute(url, method) {
   if (url === "/api/login" && method === "POST") return { route: "login" };
   if (url === "/api/summarize" && method === "POST") return { route: "summarize" };
   if (url === "/api/invoices" && (method === "GET" || method === "POST")) return { route: "invoices" };
+  if (url === "/api/invoices/stats" && method === "GET") return { route: "invoice-stats" };
 
   const corrMatch = url.match(/^\/api\/invoices\/([^/]+)\/corrections$/);
   if (corrMatch && method === "POST") return { route: "corrections", id: corrMatch[1] };
@@ -232,11 +269,14 @@ const server = createServer(async (req, res) => {
     // ── List / Create invoices ──────────────────────────────
     if (matched.route === "invoices") {
       if (req.method === "GET") {
-        const rows = await db.execute("SELECT id, created_at, summary, invoice_date FROM invoices ORDER BY created_at DESC");
+        const rows = await db.execute("SELECT id, created_at, summary, invoice_date, invoice_description, invoice_amount, invoice_category FROM invoices ORDER BY created_at DESC");
         const invoices = rows.rows.map((r) => ({
           id: r.id,
           created_at: r.created_at,
           invoice_date: r.invoice_date ?? null,
+          invoice_description: r.invoice_description ?? null,
+          invoice_amount: r.invoice_amount != null ? Number(r.invoice_amount) : null,
+          invoice_category: r.invoice_category ?? null,
           summaryPreview: r.summary ? String(r.summary).slice(0, 100) : null,
         }));
         return send(res, 200, { invoices });
@@ -249,6 +289,24 @@ const server = createServer(async (req, res) => {
         args: [id, body.image_base64, body.image_mime, JSON.stringify(body.ocr_words), Date.now()],
       });
       return send(res, 201, { id });
+    }
+
+    // ── Invoice stats ──────────────────────────────────────
+    if (matched.route === "invoice-stats") {
+      const monthlyRows = await db.execute(
+        `SELECT substr(invoice_date, 1, 7) as month, SUM(invoice_amount) as total, COUNT(*) as count
+         FROM invoices WHERE invoice_date IS NOT NULL AND invoice_amount IS NOT NULL
+         GROUP BY substr(invoice_date, 1, 7) ORDER BY month`
+      );
+      const categoryRows = await db.execute(
+        `SELECT substr(invoice_date, 1, 7) as month, invoice_category as category, SUM(invoice_amount) as total, COUNT(*) as count
+         FROM invoices WHERE invoice_date IS NOT NULL AND invoice_amount IS NOT NULL AND invoice_category IS NOT NULL
+         GROUP BY substr(invoice_date, 1, 7), invoice_category ORDER BY month, category`
+      );
+      return send(res, 200, {
+        monthly: monthlyRows.rows.map((r) => ({ month: r.month, total: Number(r.total), count: Number(r.count) })),
+        byCategory: categoryRows.rows.map((r) => ({ month: r.month, category: r.category, total: Number(r.total), count: Number(r.count) })),
+      });
     }
 
     // ── Invoice detail ──────────────────────────────────────
@@ -267,6 +325,9 @@ const server = createServer(async (req, res) => {
         ocr_words: JSON.parse(inv.ocr_words),
         summary: inv.summary,
         invoice_date: inv.invoice_date ?? null,
+        invoice_description: inv.invoice_description ?? null,
+        invoice_amount: inv.invoice_amount != null ? Number(inv.invoice_amount) : null,
+        invoice_category: inv.invoice_category ?? null,
         corrections: corrRows.rows.map((r) => ({
           wordIndex: r.word_index,
           originalText: r.original_text,
@@ -295,10 +356,10 @@ const server = createServer(async (req, res) => {
       const { text } = JSON.parse(await readBody(req));
       if (!text || typeof text !== "string") return send(res, 400, { error: "Missing text field" });
       const summary = await callGroq(text);
-      const invoiceDate = extractInvoiceDate(summary);
+      const fields = extractFields(summary);
       await db.execute({
-        sql: "UPDATE invoices SET summary = ?, invoice_date = ? WHERE id = ?",
-        args: [summary, invoiceDate, matched.id],
+        sql: "UPDATE invoices SET summary = ?, invoice_date = ?, invoice_description = ?, invoice_amount = ?, invoice_category = ? WHERE id = ?",
+        args: [summary, fields.invoiceDate, fields.invoiceDescription, fields.invoiceAmount, fields.invoiceCategory, matched.id],
       });
       return send(res, 200, { summary });
     }
@@ -307,10 +368,10 @@ const server = createServer(async (req, res) => {
     if (matched.route === "save-summary") {
       const { summary } = JSON.parse(await readBody(req));
       if (!summary || typeof summary !== "string") return send(res, 400, { error: "Missing summary field" });
-      const invoiceDate = extractInvoiceDate(summary);
+      const fields = extractFields(summary);
       await db.execute({
-        sql: "UPDATE invoices SET summary = ?, invoice_date = ? WHERE id = ?",
-        args: [summary, invoiceDate, matched.id],
+        sql: "UPDATE invoices SET summary = ?, invoice_date = ?, invoice_description = ?, invoice_amount = ?, invoice_category = ? WHERE id = ?",
+        args: [summary, fields.invoiceDate, fields.invoiceDescription, fields.invoiceAmount, fields.invoiceCategory, matched.id],
       });
       return send(res, 200, { ok: true });
     }
@@ -321,7 +382,7 @@ const server = createServer(async (req, res) => {
 });
 
 // Init schema then start listening
-ensureSchema().then(() => {
+ensureSchema().then(() => migrateSchema()).then(() => {
   server.listen(PORT, () => {
     console.log(`  [dev-server] API proxy running on http://localhost:${PORT}`);
   });

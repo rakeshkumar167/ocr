@@ -11,12 +11,15 @@ export default async function handler(request: Request): Promise<Response> {
 
   if (request.method === "GET") {
     const rows = await db.execute(
-      "SELECT id, created_at, summary, invoice_date FROM invoices ORDER BY created_at DESC"
+      "SELECT id, created_at, summary, invoice_date, invoice_description, invoice_amount, invoice_category FROM invoices ORDER BY created_at DESC"
     );
     const invoices = rows.rows.map((r) => ({
       id: r.id,
       created_at: r.created_at,
       invoice_date: r.invoice_date ?? null,
+      invoice_description: r.invoice_description ?? null,
+      invoice_amount: r.invoice_amount != null ? Number(r.invoice_amount) : null,
+      invoice_category: r.invoice_category ?? null,
       summaryPreview: r.summary ? String(r.summary).slice(0, 100) : null,
     }));
     return json({ invoices }, 200);

@@ -2,6 +2,7 @@ export const config = { runtime: "edge" };
 
 import { getDb, ensureSchema } from "../../_db";
 import { validateToken, unauthorized } from "../../_auth";
+import { extractFieldsFromSummary } from "../../_prompt";
 
 export default async function handler(request: Request): Promise<Response> {
   if (request.method !== "PUT") return json({ error: "Method not allowed" }, 405);
@@ -24,14 +25,13 @@ export default async function handler(request: Request): Promise<Response> {
     return json({ error: "Missing summary field" }, 400);
   }
 
-  const dateMatch = body.summary.match(/Invoice Date:\s*(.+)/i);
-  const invoiceDate = dateMatch && dateMatch[1].trim() !== "N/A" ? dateMatch[1].trim() : null;
+  const fields = extractFieldsFromSummary(body.summary);
 
   const db = getDb();
   await ensureSchema(db);
   await db.execute({
-    sql: "UPDATE invoices SET summary = ?, invoice_date = ? WHERE id = ?",
-    args: [body.summary, invoiceDate, invoiceId],
+    sql: "UPDATE invoices SET summary = ?, invoice_date = ?, invoice_description = ?, invoice_amount = ?, invoice_category = ? WHERE id = ?",
+    args: [body.summary, fields.invoiceDate, fields.invoiceDescription, fields.invoiceAmount, fields.invoiceCategory, invoiceId],
   });
 
   return json({ ok: true }, 200);

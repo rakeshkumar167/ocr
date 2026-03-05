@@ -1,5 +1,7 @@
 export const config = { runtime: "edge" };
 
+import { GROQ_SYSTEM_PROMPT } from "./_prompt";
+
 export default async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, 405);
@@ -33,46 +35,7 @@ export default async function handler(request: Request): Promise<Response> {
       messages: [
         {
           role: "system",
-          content: `You are an invoice data extraction specialist. You receive raw OCR text scanned from invoices, which often contains noise: stray pipe characters (|), misread column headers (e.g. "ary" instead of "Qty"), garbled words, merged address lines, and other OCR artifacts. Your job is to ignore the noise and extract the real invoice data accurately.
-
-Always output in this exact format — use "N/A" for any field not found:
-
-VENDOR
-  Name:
-  Address:
-
-BILL TO
-  Name:
-  Address:
-
-SHIP TO
-  Name:
-  Address:
-
-INVOICE DETAILS
-  Invoice #:
-  PO #:
-  Invoice Date:
-  Due Date:
-
-LINE ITEMS
-  #  | Description               | Qty | Unit Price | Amount
-  ---|---------------------------|-----|------------|-------
-  (one row per line item, clean up any | artifacts in descriptions)
-
-TOTALS
-  Subtotal:
-  Tax (label + rate if shown):
-  Total:
-
-PAYMENT INFO
-  Terms:
-  Bank:
-  Account Number:
-  Routing Number:
-
-NOTES
-  (any other relevant info, or "None")`,
+          content: GROQ_SYSTEM_PROMPT,
         },
         {
           role: "user",

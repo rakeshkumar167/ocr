@@ -5,14 +5,18 @@ interface Props {
   loading: boolean;
   onSelect: (id: string) => void;
   onNew: () => void;
+  onDashboard: () => void;
 }
 
-export function InvoiceHistory({ invoices, loading, onSelect, onNew }: Props) {
+export function InvoiceHistory({ invoices, loading, onSelect, onNew, onDashboard }: Props) {
   return (
     <div className="history-container">
       <div className="history-header">
-        <h3>Invoice History</h3>
-        <button className="reset-btn" onClick={onNew}>New Invoice</button>
+        <h3>Invoices</h3>
+        <div className="history-actions">
+          <button className="reset-btn" onClick={onDashboard}>Dashboard</button>
+          <button className="reset-btn" onClick={onNew}>New Invoice</button>
+        </div>
       </div>
       {loading && (
         <div className="history-loading">
@@ -23,21 +27,43 @@ export function InvoiceHistory({ invoices, loading, onSelect, onNew }: Props) {
         <p className="history-empty">No invoices yet. Upload one to get started.</p>
       )}
       {!loading && invoices.length > 0 && (
-        <div className="history-list">
-          {invoices.map((inv) => (
-            <button key={inv.id} className="history-item" onClick={() => onSelect(inv.id)}>
-              <span className="history-date">
-                {inv.invoice_date
-                  ? `Invoice: ${inv.invoice_date}`
-                  : new Date(inv.created_at).toLocaleDateString(undefined, {
-                      month: "short", day: "numeric", year: "numeric",
-                    })}
-              </span>
-              <span className="history-preview">
-                {inv.summaryPreview ?? "No summary"}
-              </span>
-            </button>
-          ))}
+        <div className="invoice-table-scroll">
+          <table className="invoice-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th className="amount-col">Amount</th>
+                <th>Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoices.map((inv) => (
+                <tr key={inv.id} onClick={() => onSelect(inv.id)} className="invoice-row">
+                  <td className="date-cell">
+                    {inv.invoice_date
+                      ? inv.invoice_date
+                      : new Date(inv.created_at).toLocaleDateString(undefined, {
+                          month: "short", day: "numeric", year: "numeric",
+                        })}
+                  </td>
+                  <td className="desc-cell">
+                    {inv.invoice_description ?? inv.summaryPreview ?? "—"}
+                  </td>
+                  <td className="amount-cell">
+                    {inv.invoice_amount != null
+                      ? `$${inv.invoice_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : "—"}
+                  </td>
+                  <td className="category-cell">
+                    {inv.invoice_category ? (
+                      <span className="category-badge">{inv.invoice_category}</span>
+                    ) : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

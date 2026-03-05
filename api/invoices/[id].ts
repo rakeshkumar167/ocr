@@ -30,6 +30,9 @@ export default async function handler(request: Request): Promise<Response> {
     ocr_words: JSON.parse(inv.ocr_words as string),
     summary: inv.summary,
     invoice_date: inv.invoice_date ?? null,
+    invoice_description: inv.invoice_description ?? null,
+    invoice_amount: inv.invoice_amount != null ? Number(inv.invoice_amount) : null,
+    invoice_category: inv.invoice_category ?? null,
     corrections: corrRows.rows.map((r) => ({
       wordIndex: r.word_index,
       originalText: r.original_text,

@@ -813,6 +813,11 @@ body {
   color: rgba(140, 138, 134, 0.5);
 }
 
+.history-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .history-loading {
   display: flex;
   justify-content: center;
@@ -827,48 +832,94 @@ body {
   color: var(--text-2);
 }
 
-.history-list {
-  display: flex;
-  flex-direction: column;
+/* ── Invoice Table ──────────────────────────────────────────── */
+.invoice-table-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d0d0d0 transparent;
 }
 
-.history-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px 16px;
-  border: none;
-  border-bottom: 1px solid var(--border);
-  background: transparent;
-  cursor: pointer;
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoice-table th {
+  padding: 10px 16px;
   text-align: left;
+  background: var(--surface-2);
+  font-family: var(--font-data);
+  font-weight: 500;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(140, 138, 134, 0.55);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.invoice-table th.amount-col {
+  text-align: right;
+}
+
+.invoice-row {
+  cursor: pointer;
   transition: background 0.15s;
 }
 
-.history-item:last-child {
-  border-bottom: none;
-}
-
-.history-item:hover {
+.invoice-row:hover {
   background: var(--accent-soft);
 }
 
-.history-date {
+.invoice-row td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
   font-family: var(--font-data);
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-2);
+  font-size: 0.78rem;
 }
 
-.history-preview {
-  font-family: var(--font-data);
-  font-size: 0.74rem;
-  color: var(--text);
+.invoice-row:last-child td {
+  border-bottom: none;
+}
+
+.date-cell {
   white-space: nowrap;
+  color: var(--text-2);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.desc-cell {
+  color: var(--text);
+  max-width: 400px;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amount-cell {
+  text-align: right;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.category-cell {
+  white-space: nowrap;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-family: var(--font-data);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 /* ── Low Confidence Editor ───────────────────────────────────── */
@@ -980,6 +1031,150 @@ body {
   border-color: var(--accent);
 }
 
+/* ── Dashboard ───────────────────────────────────────────────── */
+.dashboard-container {
+  background: var(--surface);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.dash-stats-row {
+  display: flex;
+  gap: 1px;
+  background: var(--border);
+}
+
+.dash-stat-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 16px;
+  background: var(--bg);
+}
+
+.dash-stat-label {
+  font-family: var(--font-data);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(140, 138, 134, 0.5);
+}
+
+.dash-stat-value {
+  font-family: var(--font-data);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dash-month-selector {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-month-label {
+  font-family: var(--font-data);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(140, 138, 134, 0.5);
+  margin-right: 4px;
+}
+
+.dash-month-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.dash-month-action {
+  padding: 3px 8px;
+  background: transparent;
+  border: 1px solid var(--border-mid);
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: var(--font-data);
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.dash-month-action:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dash-month-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dash-month-chip {
+  padding: 4px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--font-data);
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: all 0.15s;
+}
+
+.dash-month-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dash-month-chip.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dash-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+
+.dash-chart-card {
+  padding: 20px;
+  background: var(--bg);
+}
+
+.dash-chart-card h4 {
+  font-family: var(--font-data);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(140, 138, 134, 0.5);
+  margin-bottom: 16px;
+}
+
+.dash-no-data {
+  font-family: var(--font-data);
+  font-size: 0.74rem;
+  color: var(--text-2);
+  text-align: center;
+  padding: 40px;
+}
+
 /* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .app {
@@ -992,5 +1187,9 @@ body {
 
   .results-sidebar {
     width: 100%;
+  }
+
+  .dash-charts {
+    grid-template-columns: 1fr;
   }
 }

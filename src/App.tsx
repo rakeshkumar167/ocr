@@ -4,6 +4,7 @@ import { useOcr } from "./hooks/useOcr";
 import { useInvoices } from "./hooks/useInvoices";
 import { LoginPage } from "./components/LoginPage";
 import { InvoiceHistory } from "./components/InvoiceHistory";
+import { Dashboard } from "./components/Dashboard";
 import { FileUpload } from "./components/FileUpload";
 import { ImageOverlay } from "./components/ImageOverlay";
 import { ResultsTable } from "./components/ResultsTable";
@@ -12,7 +13,7 @@ import { GrokSummary } from "./components/GrokSummary";
 import { LowConfidenceEditor } from "./components/LowConfidenceEditor";
 import type { Correction } from "./types";
 
-type View = "history" | "upload" | "review";
+type View = "history" | "upload" | "review" | "dashboard";
 
 export function App() {
   const { isAuthenticated, logout, authedFetch } = useAuthContext();
@@ -165,7 +166,7 @@ export function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>OCR Web App</h1>
+        <h1>Invoice Summarizer</h1>
         <div className="header-actions">
           {view === "review" && (
             <button
@@ -178,7 +179,7 @@ export function App() {
           )}
           {view !== "history" && (
             <button className="reset-btn" onClick={handleBackToHistory}>
-              History
+              Invoices
             </button>
           )}
           <button className="logout-btn" onClick={logout}>
@@ -193,6 +194,14 @@ export function App() {
           loading={historyLoading}
           onSelect={handleSelectInvoice}
           onNew={handleNewInvoice}
+          onDashboard={() => setView("dashboard")}
+        />
+      )}
+
+      {view === "dashboard" && (
+        <Dashboard
+          authedFetch={authedFetch}
+          onBack={() => { fetchInvoices(); setView("history"); }}
         />
       )}
 
